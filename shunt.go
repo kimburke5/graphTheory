@@ -1,3 +1,7 @@
+//ID: G00269948 
+//Author: Kimberly Burke
+//Program: build a non-deterministic finite automaton (NFA) from a regular expression
+
 package main
 
 import  (
@@ -9,9 +13,9 @@ import  (
 func intopost (infix string) string {
 	//created map for special characters to map them into integers
 	//map keeps track of the allowed special character
-	// . meaning concatonate, | meaning or 
-  specials := map[rune]int{'*': 10, '.': 9, '|': 8}
-
+	// . meaning concatonate, | meaning or, * meaning the Kleene star
+	specials := map[rune]int{'*': 10, '+':9, '?': 8, '.': 7, '|': 6}
+	
 	//rune is an alias for int32 and is equivalent to int32 in all ways. 
 	//It is used, by convention, to distinguish character values from integer values. 
 	//rune is a built in data type
@@ -137,6 +141,32 @@ func poregtonfa(postfix string) *nfa{
 
 				//push new frag to stack
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+			
+			case '+':
+				//pops 1 frag off stack
+				frag := nfaStack[len(nfaStack)-1]
+				nfaStack = nfaStack[:len(nfaStack)-1]
+
+				//new accept state
+				accept := state{}
+				initial := state{edge1: frag.initial, edge2: &accept}
+				frag.accept.edge1 = frag.initial
+
+				//push new frag to stack
+				nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})
+
+			case '?':
+				//pops 1 frag off stack
+				frag := nfaStack[len(nfaStack)-1]
+				nfaStack = nfaStack[:len(nfaStack)-1]
+
+				//new accept state
+				accept := state{}
+				initial := state{edge1: frag.initial, edge2: &accept}
+				frag.accept.edge1 = frag.initial
+
+				//push new frag to stack
+				nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})
 
 	 		default:
 				//new accept state - empty
