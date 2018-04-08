@@ -63,12 +63,20 @@ To run this program navigate to the folder that the program is in through the te
 
 # References
 https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+
 http://www.oxfordmathcenter.com/drupal7/node/628
+
 https://golang.org/pkg/builtin/#rune
+
 https://chortle.ccsu.edu/FiniteAutomata/Section07/sect07_16.html
+
 https://en.wikipedia.org/wiki/Thompson%27s_construction
+
 https://web.microsoftstream.com/video/9d83a3f3-bc4f-4bda-95cc-b21c8e67675e
+
 https://learnonline.gmit.ie/
+
 https://stackoverflow.com/questions/22693275/what-does-asterisk-struct-notation-mean-in-golang
+
 http://www.fon.hum.uva.nl/praat/manual/Regular_expressions_1__Special_characters.html
 
