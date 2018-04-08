@@ -4,49 +4,74 @@ import  (
     "fmt"
 )
 
- //converts infix reg expressions to postfix reg expressions
+//converts infix reg expressions to postfix reg expressions
+//takes in a string (infix) returns a string
 func intopost (infix string) string {
-  //special characters
+	//created map for special characters to map them into integers
+	//map keeps track of the allowed special character
+	// . meaning concatonate, | meaning or 
   specials := map[rune]int{'*': 10, '.': 9, '|': 8}
 
-  //rune arrays
-  postfix := []rune{}
+	//rune is an alias for int32 and is equivalent to int32 in all ways. 
+	//It is used, by convention, to distinguish character values from integer values. 
+	//rune is a built in data type
+
+	//rune arrays used as stacks
+	//postfix reg expression
+	postfix := []rune{}
+	//stack to store operators from infix reg expression
   stack := []rune{}
 	
-  //loop through infix
-  //convert string to array of runes by using range
+  //loop through infix string convert to postfix string
+	//convert string to array of runes by using range
+	//return index of character that is currently being read
+	//for _ ignors index number
   for _, r := range infix {
-	switch{
-	  case r == '(':
-	    stack = append(stack, r)	
 
-	  case r == ')':
-		for stack[len(stack)-1] != '(' {
-		  //gets rid of last element of stack
-		  postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
-		}
+		switch{
+			//if it reads an open bracket it puts it onto the end of the stack
+	  	case r == '(':
+	   	 stack = append(stack, r)	
+
+			//if a closing bracket is read in the we are going to pop elements off the stack until we find an open bracket.
+			//everything popped off stack here will be appended onto postfix/output
+			 case r == ')':
+				//while last character on the stack does not equal to an open bracket
+				//len gives the length of an array
+				for stack[len(stack)-1] != '(' {
+		  		//gets rid of last element of stack
+		  		postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
+				}
 		
-		//takes open bracket off end of the stack
-		stack = stack[:len(stack)-1]
+				//takes open bracket off end of the stack
+				stack = stack[:len(stack)-1]
+			
+				//specials to be grester than 0, to check if current character from infix is a special character
+			case specials[r] > 0:
+				//if the presidence of the current character that we are reading
+				//is less than the presidence at the top of the stack
+				for len(stack) > 0 && specials[r] <= specials[stack[len(stack)-1]]{
+		 	 		//gets rid of element from top of stack and appends into postfix
+		  		postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
+				}
+				//append is a built in function that takes an array and appends an element onto the end of it
+				//when the element at the top of the stack has less presidence
+		  	//than the current character that we are reading
+		  	//append current character onto the stack
+				stack = append(stack, r)
+			
+			//r is neither a bracket or a special character	
+	  	default:
+				postfix = append(postfix, r)
 
-	  case specials[r] > 0:
-		for len(stack) > 0 && specials[r] <= specials[stack[len(stack)-1]]{
-		  //gets rid of last element of stack
-		  postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
-		}
-		
-		stack = append(stack, r)
-
-	  default:
-		postfix = append(postfix, r)
-	}//switch
+		}//switch
   }//for
 
   for len(stack) > 0 {
-	//gets rid of last element of stack
-	postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
+		//gets rid of last element of stack
+		postfix, stack = append(postfix, stack[len(stack)-1]), stack[:len(stack)-1]
   }
-
+	//cast postfix to a string as this function has to return a string
   return string(postfix) 
 }//intopost
 
@@ -68,56 +93,57 @@ func poregtonfa(postfix string) *nfa{
   nfastack := []*nfa{}
 
   for _, r := range postfix {
-	switch r {
-	  case '.':
-		//pops 2 frags off stack
-		frag2 := nfastack[len(nfastack)-1]
-		nfastack = nfastack[:len(nfastack)-1]
-		frag1 := nfastack[len(nfastack)-1]
-		nfastack = nfastack[:len(nfastack)-1]
 
-		//concat frag1 & frag2
-		frag1.accept.edge1 = frag2.initial
+		switch r {
+			case '.':
+				//pops 2 frags off stack
+				frag2 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+				frag1 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+
+				//concat frag1 & frag2
+				frag1.accept.edge1 = frag2.initial
+			
+				//push new frag to stack
+				nfastack = append(nfastack, &nfa{initial: frag1.initial, accept: frag2.accept})
+		
+	  	case '|':
+				//pops 2 frags off stack
+				frag2 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+				frag1 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+
+				//new accept states
+				accept := state{}
+				initial := state{edge1: frag1.initial, edge2: frag2.initial}
+				frag1.accept.edge1 = &accept
+				frag2.accept.edge1 = &accept
+
+				//push new frag to stack
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 	
-		//push new frag to stack
-		nfastack = append(nfastack, &nfa{initial: frag1.initial, accept: frag2.accept})
-	
-	  case '|':
-		//pops 2 frags off stack
-		frag2 := nfastack[len(nfastack)-1]
-		nfastack = nfastack[:len(nfastack)-1]
-		frag1 := nfastack[len(nfastack)-1]
-		nfastack = nfastack[:len(nfastack)-1]
+	 		case '*':
+				//pops 1 frag off stack
+				frag := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
 
-		//new accept states
-		accept := state{}
-		initial := state{edge1: frag1.initial, edge2: frag2.initial}
-		frag1.accept.edge1 = &accept
-		frag2.accept.edge1 = &accept
+				//new accept state
+				accept := state{}
+				initial := state{edge1: frag.initial, edge2: &accept}
+				frag.accept.edge1 = frag.initial
+				frag.accept.edge2 = &accept
 
-		//push new frag to stack
-		nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
-	
-	  case '*':
-		//pops 1 frag off stack
-		frag := nfastack[len(nfastack)-1]
-		nfastack = nfastack[:len(nfastack)-1]
+				//push new frag to stack
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 
-		//new accept state
-		accept := state{}
-		initial := state{edge1: frag.initial, edge2: &accept}
-		frag.accept.edge1 = frag.initial
-		frag.accept.edge2 = &accept
-
-		//push new frag to stack
-		nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
-
-	  default:
-		//new accept state - empty
-		accept:= state{}
-		initial := state{symbol: r, edge1: &accept}
-		//push new frag to stack
-		nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+	 		default:
+				//new accept state - empty
+				accept:= state{}
+				initial := state{symbol: r, edge1: &accept}
+				//push new frag to stack
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
   	}//switch
   }//for
 
@@ -145,7 +171,7 @@ func addState(l []*state, s *state, a *state) []*state {
 	}
 
 	return l
-}
+}//addState
 
 //checking if postfix reg expression po string matches s string
 func pomatch(po string, s string) bool {
@@ -173,7 +199,6 @@ func pomatch(po string, s string) bool {
 			//checks if current states are labled by charaters/rune read from s 
 			//to see if their symbol is set to r (rune character)
 			if c.symbol == r {
-
 				next = addState(next[:], c.edge1, ponfa.accept)
 			}
 		}
@@ -188,28 +213,33 @@ func pomatch(po string, s string) bool {
 		}
 	}
   return ismatch
-}
+}//pomatch
 
 func main () {
-  //answer: ab.c*.
-  fmt.Println ("Infix:   ", "a.b.c*")
+	//answer: ab.c*.
+	fmt.Println ("Infix:   ", "a.b.c*") //regular expression
+	//calls into post and converts regular expression to postfix notation
   fmt.Println ("Postfix: ", intopost ("a.b.c*"))
 
   //answer: abd|.*
-  fmt.Println ("Infix:   ", "(a.(b|d))*")
+	fmt.Println ("Infix:   ", "(a.(b|d))*") //regular expressions
+	//calls into post and converts regular expression to postfix notation
   fmt.Println ("Postfix: ", intopost ("(a.(b|d))*"))
 
   //answer: abd|.c*.
-  fmt.Println ("Infix:   ", "a.(b|d).c*")
+	fmt.Println ("Infix:   ", "a.(b|d).c*")	//regular expressions
+	//calls into post and converts regular expression to postfix notation
   fmt.Println ("Postfix: ", intopost("a.(b|d).c*"))
 
   //answer: abb.+.c
-  fmt.Println ("Infix:   ", "a.(b.b)+.c")
+	fmt.Println ("Infix:   ", "a.(b.b)+.c")	//regular expressions
+	//calls into post and converts regular expression to postfix notation
   fmt.Println ("Postfix: ", intopost("a.(b.b)+.c"))
 
   nfa := poregtonfa("ab.c*|")
 	fmt.Println(nfa)
 	
 	//checking against reg expressin
-  fmt.Println(pomatch("ab.c*|", "ab"))
+	fmt.Println(pomatch("ab.c*|", "ab"))
+	
 }//main
