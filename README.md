@@ -40,8 +40,8 @@ Thompson's construction is an algorithm for transforming a regular expression in
 The algorithm works recursively by splitting an expression into its constituent subexpressions, from which the NFA will be constructed using a set of rules.
 
 # Regular Expression Characters
-- * (Kleene Star) character in a regular expression means "match the preceding character zero or many times". For example A* matches       any number (including zero) of character 'A'. Stephen Kleene (1909-1994) was one of the early investigators of regular expressions and   finite automata to which the character was named after.
-- + The plus sign is the match-one-or-more quantifier.
+- *(Kleene Star) character in a regular expression means "match the preceding character zero or many times". For example A* matches       any number (including zero) of character 'A'. Stephen Kleene (1909-1994) was one of the early investigators of regular expressions and   finite automata to which the character was named after.
+- +The plus sign is the match-one-or-more quantifier.
 - ? The question mark is the match-zero-or-one quantifier. The question mark is also used in special constructs with parentheses and in   changing match behaviour.
 - | the vertical pipe meaning or separates a series of alternatives.
     Example: "(a|b|c)a" matches "aa" or "ba" or "ca".
