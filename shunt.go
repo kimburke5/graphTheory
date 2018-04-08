@@ -144,8 +144,8 @@ func poregtonfa(postfix string) *nfa{
 			
 			case '+':
 				//pops 1 frag off stack
-				frag := nfaStack[len(nfaStack)-1]
-				nfaStack = nfaStack[:len(nfaStack)-1]
+				frag := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
 
 				//new accept state
 				accept := state{}
@@ -153,12 +153,12 @@ func poregtonfa(postfix string) *nfa{
 				frag.accept.edge1 = frag.initial
 
 				//push new frag to stack
-				nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 
 			case '?':
 				//pops 1 frag off stack
-				frag := nfaStack[len(nfaStack)-1]
-				nfaStack = nfaStack[:len(nfaStack)-1]
+				frag := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
 
 				//new accept state
 				accept := state{}
@@ -166,7 +166,7 @@ func poregtonfa(postfix string) *nfa{
 				frag.accept.edge1 = frag.initial
 
 				//push new frag to stack
-				nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 
 	 		default:
 				//new accept state - empty
